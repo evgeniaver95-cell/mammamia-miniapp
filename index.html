@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mamma mia, che club! — мини‑апп</title>
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body data-theme="light">
+  <div class="wrap">
+    <header>
+      <div class="logo">🍝</div>
+      <div>
+        <h1>Mamma mia, che club!</h1>
+        <div class="hint">навигатор материалов</div>
+      </div>
+    </header>
+
+    <div class="search">
+      <input id="searchInput" placeholder="Поиск по материалам…" />
+      <div class="loupe">⌕</div>
+    </div>
+
+    <div class="tags" id="tags"></div>
+
+    <h2 class="section-title">Разделы</h2>
+    <div class="grid" id="sections"></div>
+
+    <div class="toast" id="toast">Готово!</div>
+  </div>
+
+  <nav class="bottom">
+    <button data-tab="home" class="active">🏠<span>Домой</span></button>
+    <button data-tab="about">👥<span>О клубе</span></button>
+    <button data-tab="chats">💬<span>Чаты</span></button>
+    <button data-tab="fav">⭐<span>Избранное</span></button>
+    <button data-tab="amb">🛡️<span>Амбассадоры</span></button>
+  </nav>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
