@@ -57,9 +57,16 @@ h1 { margin:0; font-size:22px; }
   margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: .04em;
-  white-space: normal;
-  word-break: break-word;
+  max-width: 72%;             /* сужаем область текста, чтобы он мог перенестись */
+  white-space: normal;         /* разрешаем переносить строки */
+  word-break: break-word;      /* если длинное слово */
   line-height: 1.2;
+
+  /* не обязательно, но красиво: clamp до 2 строк */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .badge {
   position: absolute;
