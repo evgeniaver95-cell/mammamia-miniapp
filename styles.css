@@ -1,3 +1,4 @@
+* { box-sizing: border-box; }
 :root {
   --bg:#ffffff; --text:#111; --hint:#6b7280; --card:#f6f7fb; --chip:#eef2ff; --brand:#111827; --brandText:#fff;
   --border: rgba(0,0,0,0.08);
@@ -24,33 +25,36 @@ h1 { margin:0; font-size:22px; }
 @media (min-width:720px){
   .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+/* Карточка — компактный прямоугольник */
 .card {
   position: relative;
-  height: 112px;              /* было ~108px — можно поставить 108–120 */
+  min-height: 112px;           /* можно 108–120 */
   border-radius: 16px;
   background: linear-gradient(135deg,#f7f8fc,#eef2ff);
-  padding: 14px;              /* компактнее отступы */
-  padding-bottom: 44px;       /* место под обложку снизу */
+  padding: 14px;               /* без padding-bottom! */
   border: 1px solid var(--border);
   cursor: pointer;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  /* ВАЖНО: никакого aspect-ratio здесь быть не должно */
 }
+/* Обложка снизу справа, умеренного размера */
 .card .cover {
   position: absolute;
   right: 12px;
   bottom: 10px;
-  font-size: 38px;            /* можно 36–42 */
+  font-size: 38px;             /* 36–42 по вкусу */
   opacity: 0.8;
   pointer-events: none;
 }
+/* Заголовок */
 .card .title {
   position: relative;
   font-weight: 700;
   font-size: 15px;
-  margin-top: 4px;            /* т.к. cover внизу */
+  margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
