@@ -27,23 +27,34 @@ h1 { margin:0; font-size:22px; }
   }
 }
 .card {
-  aspect-ratio: 16 / 10;      /* прямоугольник */
-  min-height: 120px;          /* на узких экранах не становиться слишком низкой */
-  padding: 16px 16px 56px;
+  position: relative;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f7f8fc, #eef2ff);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  overflow: hidden;
+
+  /* Контент и форма */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 16px 16px 56px;   /* место под обложку снизу */
+  aspect-ratio: 16 / 10;     /* прямоугольник */
+  min-height: 120px;         /* чтобы на узких экранах не становилась слишком плоской */
 }
 .card .cover {
   position: absolute;
   right: 12px;
   bottom: 10px;
-  font-size: 44px;   /* можно 48–56, если хочешь крупнее */
-  opacity: 0.85;     /* была 0.2 — делаем заметной */
+  font-size: 44px;  /* можно 52–56 */
+  opacity: 0.85;
   pointer-events: none;
 }
 .card .title {
   position: relative;
   font-weight: 700;
   font-size: 15px;
-  margin-top: 6px;   /* можно 0–10px, т.к. cover ушёл вниз */
+  margin-top: 6px;
   text-transform: uppercase;
   letter-spacing: .04em;
 }
