@@ -54,10 +54,10 @@ function renderSections() {
     el.className = 'card';
     el.onclick = () => openSection(sec);
     el.innerHTML = `
-      <div class="cover">${sec.cover || ""}</div>
-      <div class="title">${sec.title}</div>
-      <div class="badge" aria-label="количество">${count}</div>
-    `;
+  <div class="title">${sec.title}</div>
+  <div class="cover">${sec.cover || ""}</div>
+  <div class="badge" aria-label="количество">${count}</div>
+`;
     $sections.appendChild(el);
   });
 }
