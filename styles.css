@@ -19,63 +19,55 @@ h1 { margin:0; font-size:22px; }
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 10px;
 }
-@media (min-width: 720px) {
-  .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+@media (min-width:720px){
+  .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .card {
   position: relative;
+  height: 112px;              /* было ~108px — можно поставить 108–120 */
   border-radius: 16px;
-  background: linear-gradient(135deg, #f7f8fc, #eef2ff);
+  background: linear-gradient(135deg,#f7f8fc,#eef2ff);
+  padding: 14px;              /* компактнее отступы */
+  padding-bottom: 44px;       /* место под обложку снизу */
   border: 1px solid var(--border);
   cursor: pointer;
   overflow: hidden;
-
-  /* Контент и форма */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: 16px 16px 56px;   /* место под обложку снизу */
-  aspect-ratio: 16 / 10;     /* прямоугольник */
-  min-height: 120px;         /* чтобы на узких экранах не становилась слишком плоской */
 }
 .card .cover {
   position: absolute;
   right: 12px;
   bottom: 10px;
-  font-size: 44px;  /* можно 52–56 */
-  opacity: 0.85;
+  font-size: 38px;            /* можно 36–42 */
+  opacity: 0.8;
   pointer-events: none;
 }
 .card .title {
   position: relative;
   font-weight: 700;
   font-size: 15px;
-  margin-top: 6px;
+  margin-top: 4px;            /* т.к. cover внизу */
   text-transform: uppercase;
   letter-spacing: .04em;
 }
-.badge{
-  position:absolute;
-  top:8px;             /* можно 10–12px, если хочешь чуть ниже */
-  right:8px;
-  min-width:32px;      /* круг/капсула — растянется если число 3+ знаков */
-  height:32px;
-  padding:0 8px;       /* для 2–3 знаков будет капсула шире круга */
-  border-radius:999px; /* круг/капсула */
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  background:var(--brand,#1d4ed8);
-  color:var(--brandText,#fff);
-  font-size:14px;      /* увеличенный размер цифры */
-  font-weight:800;
-  line-height:1;
-  box-shadow:0 8px 24px rgba(2,6,23,.16);
-  border:1px solid rgba(0,0,0,.06);
+.badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--brand,#1d4ed8);
+  color: var(--brandText,#fff);
+  font-size: 13px; font-weight: 800; line-height: 1;
+  box-shadow: 0 8px 24px rgba(2,6,23,.16);
+  border: 1px solid rgba(0,0,0,.06);
 }
 .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:78px; background:#111827; color:#fff; padding:10px 14px; border-radius:12px; opacity:0; transition:opacity .2s ease; }
 .toast.show { opacity:1; }
