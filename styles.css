@@ -57,6 +57,9 @@ h1 { margin:0; font-size:22px; }
   margin-top: 2px;
   text-transform: uppercase;
   letter-spacing: .04em;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.2;
 }
 .badge {
   position: absolute;
