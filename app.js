@@ -48,15 +48,15 @@ function matchFilters(item) {
 function renderSections() {
   $sections.innerHTML = "";
   state.sections.forEach(sec => {
-    const visibleItems = (sec.items || []).filter(matchFilters);
-    // Карточка раздела
+    const count = (sec.items || []).filter(matchFilters).length;
+
     const el = document.createElement('div');
     el.className = 'card';
     el.onclick = () => openSection(sec);
     el.innerHTML = `
       <div class="cover">${sec.cover || ""}</div>
       <div class="title">${sec.title}</div>
-      <div class="badge">${visibleItems.length} материалов</div>
+      <div class="badge" aria-label="количество">${count}</div>
     `;
     $sections.appendChild(el);
   });
