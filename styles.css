@@ -22,7 +22,25 @@ h1 { margin:0; font-size:22px; }
 .card { position:relative; min-height:108px; border-radius:16px; background:linear-gradient(135deg,#f7f8fc, #eef2ff); padding:12px; border:1px solid var(--border); cursor:pointer; overflow:hidden; }
 .card .cover { position:absolute; right:10px; top:8px; font-size:42px; opacity:.2; }
 .card .title { position:relative; font-weight:700; font-size:15px; margin-top:46px; text-transform:uppercase; letter-spacing:.04em; }
-.badge { position:absolute; top:-6px; right:-6px; background:#111827; color:#fff; font-size:11px; padding:4px 8px; border-radius:999px; box-shadow:0 4px 12px rgba(0,0,0,.12); }
+.badge{
+  position:absolute;
+  top:8px;             /* можно 10–12px, если хочешь чуть ниже */
+  right:8px;
+  min-width:32px;      /* круг/капсула — растянется если число 3+ знаков */
+  height:32px;
+  padding:0 8px;       /* для 2–3 знаков будет капсула шире круга */
+  border-radius:999px; /* круг/капсула */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--brand,#1d4ed8);
+  color:var(--brandText,#fff);
+  font-size:14px;      /* увеличенный размер цифры */
+  font-weight:800;
+  line-height:1;
+  box-shadow:0 8px 24px rgba(2,6,23,.16);
+  border:1px solid rgba(0,0,0,.06);
+}
 .toast { position:fixed; left:50%; transform:translateX(-50%); bottom:78px; background:#111827; color:#fff; padding:10px 14px; border-radius:12px; opacity:0; transition:opacity .2s ease; }
 .toast.show { opacity:1; }
 .bottom { position:fixed; left:0; right:0; bottom:0; display:grid; grid-template-columns:repeat(5,1fr); border-top:1px solid var(--border); background:#fff; padding:6px 6px; }
