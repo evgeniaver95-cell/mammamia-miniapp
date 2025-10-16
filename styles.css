@@ -19,9 +19,33 @@ h1 { margin:0; font-size:22px; }
 .section-title { font-size:15px; opacity:.75; margin:8px 0; }
 .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
 @media (min-width:720px){ .grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
-.card { position:relative; min-height:108px; border-radius:16px; background:linear-gradient(135deg,#f7f8fc, #eef2ff); padding:12px; border:1px solid var(--border); cursor:pointer; overflow:hidden; }
-.card .cover { position:absolute; right:10px; top:8px; font-size:42px; opacity:.2; }
-.card .title { position:relative; font-weight:700; font-size:15px; margin-top:46px; text-transform:uppercase; letter-spacing:.04em; }
+.card {
+  position: relative;
+  min-height: 120px;
+  border-radius: 16px;
+  background: linear-gradient(135deg,#f7f8fc,#eef2ff);
+  padding: 16px;
+  padding-bottom: 48px; /* ← добавили место под cover внизу */
+  border: 1px solid var(--border);
+  cursor: pointer;
+  overflow: hidden;
+}
+.card .cover {
+  position: absolute;
+  right: 12px;
+  bottom: 10px;
+  font-size: 44px;   /* можно 48–56, если хочешь крупнее */
+  opacity: 0.85;     /* была 0.2 — делаем заметной */
+  pointer-events: none;
+}
+.card .title {
+  position: relative;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 6px;   /* можно 0–10px, т.к. cover ушёл вниз */
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
 .badge{
   position:absolute;
   top:8px;             /* можно 10–12px, если хочешь чуть ниже */
