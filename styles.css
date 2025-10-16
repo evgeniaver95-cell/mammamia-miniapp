@@ -27,18 +27,9 @@ h1 { margin:0; font-size:22px; }
   }
 }
 .card {
-  position: relative;
-  height: 120px; /* вместо min-height */
-  border-radius: 16px;
-  background: linear-gradient(135deg, #f7f8fc, #eef2ff);
-  padding: 16px;
-  padding-bottom: 48px;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  aspect-ratio: 16 / 10;      /* прямоугольник */
+  min-height: 120px;          /* на узких экранах не становиться слишком низкой */
+  padding: 16px 16px 56px;
 }
 .card .cover {
   position: absolute;
