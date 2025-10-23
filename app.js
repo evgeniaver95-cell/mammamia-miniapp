@@ -63,38 +63,55 @@ function renderSections() {
 }
 
 function openSection(section) {
-  // Если у раздела есть defaultLink — открываем его.
-  if (section.defaultLink) {
-    openLink(section.defaultLink);
-    return;
-  }
-  // Иначе показываем быстрый выбор последних материалов (до 4).
-  const items = (section.items || []).filter(matchFilters).slice(0, 4);
+  const tg = window.Telegram?.WebApp;
+
+  // Материалы раздела под текущие фильтры/поиск
+  const items = (section.items || []).filter(matchFilters);
   const text = items.length
-    ? 'Выберите материал ниже или откройте раздел.'
+    ? 'Выберите материал ниже или откройте весь раздел.'
     : 'Материалы не найдены под текущий фильтр/поиск.';
-  const buttons = items.map((it, idx) => ({ id: String(idx), type: 'default', text: it.title.slice(0, 30) }));
-  buttons.push({ id: 'open', type: 'default', text: 'Открыть раздел' });
+
+  // Сформируем до 6 быстрых кнопок (чтобы не расползалось)
+  const quickButtons = items.slice(0, 6).map((it, idx) => ({
+    id: String(idx),
+    type: 'default',
+    text: it.title.slice(0, 30)
+  }));
+
   if (tg?.showPopup) {
-    tg.showPopup({
-      title: section.title,
-      message: text,
-      buttons
-    }, (btnId) => {
-      if (btnId === 'open') {
-        // по умолчанию открываем первый материал раздела, если он есть
-        const first = section.items?.[0];
-        if (first?.url) openLink(first.url);
-      } else {
+    tg.showPopup(
+      {
+        title: section.title,
+        message: text,
+        buttons: [
+          ...quickButtons,
+          { id: 'open',   type: 'default',  text: 'Открыть раздел' },
+          { id: 'cancel', type: 'cancel',   text: 'Отмена' } // ← добавили «Отмена»
+        ]
+      },
+      (btnId) => {
+        // Если закрыли попап крестиком/свайпом или нажали «Отмена» — просто выходим
+        if (btnId === undefined || btnId === null || btnId === 'cancel') {
+          return; // ничего не делаем
+        }
+
+        if (btnId === 'open') {
+          // Здесь можно открыть «полный раздел».
+          // Пока открываем первый материал раздела, если он есть:
+          const first = section.items?.[0];
+          if (first?.url) openLink(first.url);
+          return;
+        }
+
+        // Клик по одному из быстрых материалов
         const idx = Number(btnId);
         const chosen = items[idx];
         if (chosen?.url) openLink(chosen.url);
       }
-    });
+    );
   } else {
-    // Фоллбек — открываем первый материал
-    const first = section.items?.[0];
-    if (first?.url) openLink(first.url);
+    // Без Telegram-попапов — ничего не делаем (или покажем подсказку)
+    toast('Выберите материал из списка');
   }
 }
 
