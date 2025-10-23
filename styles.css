@@ -11,7 +11,14 @@ header { display:flex; align-items:center; gap:12px; margin:8px 0 12px; }
 h1 { margin:0; font-size:22px; }
 .hint { color:var(--hint); font-size:13px; margin-top:2px; }
 .search { position:relative; margin:8px 0 12px; }
-.search input { width:100%; padding:12px 40px 12px 14px; border-radius:14px; border:1px solid var(--border); background:#fff; outline:none; }
+.search input {
+  width: 100%;
+  padding: 12px 40px 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: #fff;
+  outline: none;
+}
 .loupe { position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--hint); }
 .tags { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; margin-bottom:8px; }
 .tag { padding:8px 12px; border-radius:999px; background:var(--chip); font-size:13px; white-space:nowrap; border:1px solid var(--border); cursor:pointer; }
