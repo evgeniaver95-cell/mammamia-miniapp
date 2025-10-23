@@ -63,41 +63,48 @@ function renderSections() {
 }
 
 function openSection(section) {
-  // Если у раздела есть defaultLink — открываем его.
-  if (section.defaultLink) {
-    openLink(section.defaultLink);
-    return;
-  }
-  // Иначе показываем быстрый выбор последних материалов (до 4).
-  const items = (section.items || []).filter(matchFilters).slice(0, 4);
+  const tg = window.Telegram?.WebApp;
+
+  // Фильтруем материалы раздела по активным фильтрам/поиску
+  const items = (section.items || []).filter(matchFilters);
   const text = items.length
-    ? 'Выберите материал ниже или откройте раздел.'
+    ? 'Выберите материал ниже:'
     : 'Материалы не найдены под текущий фильтр/поиск.';
-  const buttons = items.map((it, idx) => ({ id: String(idx), type: 'default', text: it.title.slice(0, 30) }));
-  buttons.push({ id: 'open', type: 'default', text: 'Открыть раздел' });
+
+  // Кнопки для каждого материала (до 6 штук)
+  const quickButtons = items.slice(0, 6).map((it, idx) => ({
+    id: String(idx),
+    type: 'default',
+    text: it.title.slice(0, 30)
+  }));
+
+  // Если Telegram поддерживает showPopup
   if (tg?.showPopup) {
-    tg.showPopup({
-      title: section.title,
-      message: text,
-      buttons
-    }, (btnId) => {
-      if (btnId === 'open') {
-        // по умолчанию открываем первый материал раздела, если он есть
-        const first = section.items?.[0];
-        if (first?.url) openLink(first.url);
-      } else {
+    tg.showPopup(
+      {
+        title: section.title,
+        message: text,
+        buttons: [
+          ...quickButtons,
+          { id: 'cancel', type: 'cancel', text: 'Отмена' } // только “Отмена”
+        ]
+      },
+      (btnId) => {
+        // Нажали “Отмена” или закрыли — ничего не делаем
+        if (btnId === undefined || btnId === null || btnId === 'cancel') {
+          return;
+        }
+
+        // Клик по материалу
         const idx = Number(btnId);
         const chosen = items[idx];
         if (chosen?.url) openLink(chosen.url);
       }
-    });
+    );
   } else {
-    // Фоллбек — открываем первый материал
-    const first = section.items?.[0];
-    if (first?.url) openLink(first.url);
+    toast('Выберите материал из списка');
   }
 }
-
 function openLink(url) {
   // Открываем корректно внутри Telegram
   if (tg?.openTelegramLink && /^https?:\/\//.test(url)) {
@@ -107,7 +114,6 @@ function openLink(url) {
   }
   toast('Открываю…');
 }
-
 function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
