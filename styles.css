@@ -99,18 +99,20 @@ h1 { margin:0; font-size:22px; }
   z-index: 10;
 }
 .bottom a {
-  text-decoration: none;          /* убираем подчёркивание */
-  color: #111;                    /* цвет текста */
+  text-decoration: none;
+  color: #111;
   display: flex;
-  flex-direction: column;         /* иконка сверху, текст снизу */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;                       /* расстояние между иконкой и текстом */
-  padding: 6px 4px;
-  border-radius: 10px;
-  font-size: 12px;
-  opacity: 0.8;
+  gap: 6px;
+  padding: 10px 4px;
+  border-radius: 12px;
+  font-size: 22px; /* размер эмодзи */
+  opacity: 0.85;
   transition: all 0.2s ease;
+  text-align: center; /* выравнивание текста */
+  line-height: 1.2;
 }
 /* Эффект при наведении (или тапе) */
 .bottom a:hover,
@@ -120,8 +122,12 @@ h1 { margin:0; font-size:22px; }
 }
 /* Мелкий шрифт для подписи */
 .bottom a span {
-  font-size: 10px;
-  line-height: 1;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  white-space: normal; /* разрешаем перенос */
+  line-height: 1.2;
+  max-width: 90px; /* чтобы текст переносился аккуратно */
 }
 .bottom button { background:transparent; border:0; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 4px; border-radius:10px; font-size:12px; color:#111; opacity:.75; }
 .bottom button.active { color:#2563eb; opacity:1; }
