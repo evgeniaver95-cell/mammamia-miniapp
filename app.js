@@ -52,7 +52,7 @@ function renderSections() {
 
     const el = document.createElement('div');
     el.className = 'card';
-    el.onclick = () => openSectionV2(sec);
+    el.onclick = () => openSectionV3(sec);
     el.innerHTML = `
   <div class="title">${sec.title}</div>
   <div class="cover">${sec.cover || ""}</div>
@@ -62,33 +62,31 @@ function renderSections() {
   });
 }
 
-function openSectionV2(section) {
+function openSectionV3(section) {
   const tg = window.Telegram?.WebApp;
 
   const allItems = (section.items || []).filter(matchFilters);
-  if (!tg?.showPopup) {
-    if (allItems[0]?.url) openLink(allItems[0].url);
+
+  // Нет материалов — короткий алерт и выходим
+  if (!allItems.length) {
+    if (tg?.showAlert) tg.showAlert('Материалы не найдены под текущий фильтр/поиск.');
     else toast('Материалы не найдены');
     return;
   }
 
-  const msg = allItems.length
-    ? 'Выберите материал ниже:'
-    : 'Материалы не найдены под текущий фильтр/поиск.';
-
+  // Обрезаем очень длинные подписи
   const trim = (s, n = 28) => {
     if (!s) return '';
     s = String(s).replace(/\s+/g, ' ').trim();
     return s.length > n ? s.slice(0, n - 1) + '…' : s;
   };
 
-  // показываем по 2 материала + 1 служебная кнопка (итого ≤3)
-  const PAGE = 2;
+  const PAGE = 2; // по 2 материала на экран
+  const msg = 'Выберите материал ниже:';
 
   const showPage = (start = 0) => {
     const slice = allItems.slice(start, start + PAGE);
 
-    /** строим кнопки: 2 материала + (Ещё… или Отмена) */
     const buttons = slice.map((it, i) => ({
       id: String(start + i),          // глобальный индекс
       type: 'default',
@@ -97,25 +95,27 @@ function openSectionV2(section) {
 
     const hasMore = start + PAGE < allItems.length;
     if (hasMore) {
+      // единственная служебная кнопка
       buttons.push({ id: 'more:' + (start + PAGE), type: 'default', text: 'Ещё…' });
-    } else {
-      // обычная кнопка, чтобы она гарантированно была последней
-      buttons.push({ id: 'close', type: 'default', text: 'Отмена' });
     }
+    // НИКАКОЙ "Отмена" тут больше нет — закрывается жестом
 
-    tg.showPopup({ title: section.title, message: msg, buttons }, (btnId) => {
-      if (btnId == null || btnId === 'close') return;
+    tg.showPopup(
+      { title: section.title, message: msg, buttons },
+      (btnId) => {
+        if (btnId == null) return; // закрыли жестом
 
-      if (btnId.startsWith('more:')) {
-        const nextStart = Number(btnId.split(':')[1]);
-        showPage(nextStart);
-        return;
+        if (btnId.startsWith?.('more:')) {
+          const nextStart = Number(btnId.split(':')[1]);
+          showPage(nextStart);
+          return;
+        }
+
+        const idx = Number(btnId);
+        const chosen = allItems[idx];
+        if (chosen?.url) openLink(chosen.url);
       }
-
-      const idx = Number(btnId);
-      const chosen = allItems[idx];
-      if (chosen?.url) openLink(chosen.url);
-    });
+    );
   };
 
   showPage(0);
