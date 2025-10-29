@@ -62,36 +62,35 @@ function renderSections() {
   });
 }
 
-function openSectionV2(section) {  // новое имя
+function openSectionV2(section) {
   const tg = window.Telegram?.WebApp;
-  console.log('openSectionV2: без кнопки "Открыть раздел"');
 
   const items = (section.items || []).filter(matchFilters);
   const text = items.length ? 'Выберите материал ниже:' : 'Материалы не найдены под текущий фильтр/поиск.';
 
-  const quickButtons = items.slice(0, 6).map((it, idx) => ({
+  const trimLabel = (s, n = 28) =>
+    (s || '').replace(/\s+/g, ' ').trim().slice(0, n) + ((s || '').length > n ? '…' : '');
+
+  const materialButtons = items.slice(0, 6).map((it, idx) => ({
     id: String(idx),
     type: 'default',
-    text: it.title.slice(0, 30)
+    text: trimLabel(it.title, 28)
   }));
 
+  // ⬇️ «Отмена» делаем обычной кнопкой, чтобы она оставалась внизу
+  const buttons = [
+    ...materialButtons,
+    { id: 'close', type: 'default', text: 'Отмена' }
+  ];
+
   if (tg?.showPopup) {
-    tg.showPopup(
-      {
-        title: section.title,
-        message: text,
-        buttons: [
-  ...quickButtons,
-  { id: 'cancel', type: 'cancel', text: 'Отмена' }
-].reverse()
-      },
-      (btnId) => {
-        if (btnId == null || btnId === 'cancel') return;
-        const idx = Number(btnId);
-        const chosen = items[idx];
-        if (chosen?.url) openLink(chosen.url);
-      }
-    );
+    tg.showPopup({ title: section.title, message: text, buttons }, (btnId) => {
+      if (btnId == null || btnId === 'close') return; // просто закрываемся
+
+      const idx = Number(btnId);
+      const chosen = items[idx];
+      if (chosen?.url) openLink(chosen.url);
+    });
   } else {
     toast('Выберите материал из списка');
   }
