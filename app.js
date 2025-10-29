@@ -65,35 +65,60 @@ function renderSections() {
 function openSectionV2(section) {
   const tg = window.Telegram?.WebApp;
 
-  const items = (section.items || []).filter(matchFilters);
-  const text = items.length ? 'Выберите материал ниже:' : 'Материалы не найдены под текущий фильтр/поиск.';
+  const allItems = (section.items || []).filter(matchFilters);
+  if (!tg?.showPopup) {
+    if (allItems[0]?.url) openLink(allItems[0].url);
+    else toast('Материалы не найдены');
+    return;
+  }
 
-  const trimLabel = (s, n = 28) =>
-    (s || '').replace(/\s+/g, ' ').trim().slice(0, n) + ((s || '').length > n ? '…' : '');
+  const msg = allItems.length
+    ? 'Выберите материал ниже:'
+    : 'Материалы не найдены под текущий фильтр/поиск.';
 
-  const materialButtons = items.slice(0, 6).map((it, idx) => ({
-    id: String(idx),
-    type: 'default',
-    text: trimLabel(it.title, 28)
-  }));
+  const trim = (s, n = 28) => {
+    if (!s) return '';
+    s = String(s).replace(/\s+/g, ' ').trim();
+    return s.length > n ? s.slice(0, n - 1) + '…' : s;
+  };
 
-  // ⬇️ «Отмена» делаем обычной кнопкой, чтобы она оставалась внизу
-  const buttons = [
-    ...materialButtons,
-    { id: 'close', type: 'default', text: 'Отмена' }
-  ];
+  // показываем по 2 материала + 1 служебная кнопка (итого ≤3)
+  const PAGE = 2;
 
-  if (tg?.showPopup) {
-    tg.showPopup({ title: section.title, message: text, buttons }, (btnId) => {
-      if (btnId == null || btnId === 'close') return; // просто закрываемся
+  const showPage = (start = 0) => {
+    const slice = allItems.slice(start, start + PAGE);
+
+    /** строим кнопки: 2 материала + (Ещё… или Отмена) */
+    const buttons = slice.map((it, i) => ({
+      id: String(start + i),          // глобальный индекс
+      type: 'default',
+      text: trim(it.title, 28)
+    }));
+
+    const hasMore = start + PAGE < allItems.length;
+    if (hasMore) {
+      buttons.push({ id: 'more:' + (start + PAGE), type: 'default', text: 'Ещё…' });
+    } else {
+      // обычная кнопка, чтобы она гарантированно была последней
+      buttons.push({ id: 'close', type: 'default', text: 'Отмена' });
+    }
+
+    tg.showPopup({ title: section.title, message: msg, buttons }, (btnId) => {
+      if (btnId == null || btnId === 'close') return;
+
+      if (btnId.startsWith('more:')) {
+        const nextStart = Number(btnId.split(':')[1]);
+        showPage(nextStart);
+        return;
+      }
 
       const idx = Number(btnId);
-      const chosen = items[idx];
+      const chosen = allItems[idx];
       if (chosen?.url) openLink(chosen.url);
     });
-  } else {
-    toast('Выберите материал из списка');
-  }
+  };
+
+  showPage(0);
 }
 
 function openLink(url) {
