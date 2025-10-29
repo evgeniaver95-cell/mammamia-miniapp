@@ -52,7 +52,7 @@ function renderSections() {
 
     const el = document.createElement('div');
     el.className = 'card';
-    el.onclick = () => openSection(sec);
+    el.onclick = () => openSectionV2(sec);
     el.innerHTML = `
   <div class="title">${sec.title}</div>
   <div class="cover">${sec.cover || ""}</div>
@@ -62,16 +62,13 @@ function renderSections() {
   });
 }
 
-function openSection(section) {
+function openSectionV2(section) {  // новое имя
   const tg = window.Telegram?.WebApp;
+  console.log('openSectionV2: без кнопки "Открыть раздел"');
 
-  // Материалы раздела под текущие фильтры/поиск
   const items = (section.items || []).filter(matchFilters);
-  const text = items.length
-    ? 'Выберите материал ниже или откройте весь раздел.'
-    : 'Материалы не найдены под текущий фильтр/поиск.';
+  const text = items.length ? 'Выберите материал ниже:' : 'Материалы не найдены под текущий фильтр/поиск.';
 
-  // Сформируем до 6 быстрых кнопок (чтобы не расползалось)
   const quickButtons = items.slice(0, 6).map((it, idx) => ({
     id: String(idx),
     type: 'default',
@@ -85,32 +82,17 @@ function openSection(section) {
         message: text,
         buttons: [
           ...quickButtons,
-          { id: 'open',   type: 'default',  text: 'Открыть раздел' },
-          { id: 'cancel', type: 'cancel',   text: 'Отмена' } // ← добавили «Отмена»
+          { id: 'cancel', type: 'cancel', text: 'Отмена' }
         ]
       },
       (btnId) => {
-        // Если закрыли попап крестиком/свайпом или нажали «Отмена» — просто выходим
-        if (btnId === undefined || btnId === null || btnId === 'cancel') {
-          return; // ничего не делаем
-        }
-
-        if (btnId === 'open') {
-          // Здесь можно открыть «полный раздел».
-          // Пока открываем первый материал раздела, если он есть:
-          const first = section.items?.[0];
-          if (first?.url) openLink(first.url);
-          return;
-        }
-
-        // Клик по одному из быстрых материалов
+        if (btnId == null || btnId === 'cancel') return;
         const idx = Number(btnId);
         const chosen = items[idx];
         if (chosen?.url) openLink(chosen.url);
       }
     );
   } else {
-    // Без Telegram-попапов — ничего не делаем (или покажем подсказку)
     toast('Выберите материал из списка');
   }
 }
@@ -131,7 +113,6 @@ function toast(msg) {
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 1600);
 }
-
 // Telegram UI
 if (tg) {
   try {
