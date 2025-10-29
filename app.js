@@ -81,9 +81,9 @@ function openSectionV2(section) {  // новое имя
         title: section.title,
         message: text,
         buttons: [
-  ...quickButtons.reverse(), // сначала материалы
-  { id: 'cancel', type: 'cancel', text: 'Отмена' } // потом "Отмена" внизу
-]
+  ...quickButtons,
+  { id: 'cancel', type: 'cancel', text: 'Отмена' }
+].reverse()
       },
       (btnId) => {
         if (btnId == null || btnId === 'cancel') return;
