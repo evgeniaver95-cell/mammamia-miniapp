@@ -83,7 +83,7 @@ function openSectionV2(section) {
   };
 
   // показываем по 2 материала + 1 служебная кнопка (итого ≤3)
-  const PAGE = 2;
+  const PAGE = 3;
 
   const showPage = (start = 0) => {
     const slice = allItems.slice(start, start + PAGE);
