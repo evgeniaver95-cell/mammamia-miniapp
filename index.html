@@ -39,5 +39,20 @@
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="./app.js?v=14"></script>
+<!-- Экран раздела (full-screen) -->
+<div id="sectionPage" class="section-page" hidden>
+  <header class="section-page__head">
+    <button id="spBack" class="sp-btn">←</button>
+    <h2 id="spTitle">Раздел</h2>
+    <button id="spClose" class="sp-btn">✕</button>
+  </header>
+
+  <div class="section-page__search">
+    <input id="spSearch" type="text" placeholder="Поиск внутри раздела…">
+  </div>
+
+  <div id="spList" class="section-page__list"></div>
+</div>
+
 </body>
 </html>
