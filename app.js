@@ -1,6 +1,13 @@
 
 // Мини‑апп «Mamma mia, che club!» — навигация по материалам
 const $sp = document.getElementById('sectionPage');
+// Если страница ещё не отрисована, дождёмся DOM:
+if (!$sp || !$spTitle || !$spBack || !$spClose || !$spSearch || !$spList) {
+  window.addEventListener('DOMContentLoaded', () => {
+    // Пере-свяжем элементы
+    window.location.reload(); // самый простой и надёжный вариант подтянуть DOM + JS
+  });
+}
 const $spTitle = document.getElementById('spTitle');
 const $spBack = document.getElementById('spBack');
 const $spClose = document.getElementById('spClose');
@@ -219,9 +226,15 @@ document.querySelectorAll('nav.bottom button').forEach(btn => {
     document.querySelectorAll('nav.bottom button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     const tab = btn.dataset.tab;
-    if (tab === 'about') toast('Здесь будет «О клубе»');
-    if (tab === 'chats') toast('Здесь будут ссылки на чаты');
-    if (tab === 'fav') toast('Здесь будут избранные материалы');
-    if (tab === 'amb') toast('Здесь будет программа амбассадоров');
+    if ($spBack)  $spBack.addEventListener('click', closeSectionPage);
+if ($spClose) $spClose.addEventListener('click', closeSectionPage);
+if ($spSearch) $spSearch.addEventListener('input', e => {
+  innerQuery = e.target.value;
+  renderSectionItems();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $sp && !$sp.hidden) closeSectionPage();
+});
+
   });
 });
