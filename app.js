@@ -1,66 +1,135 @@
+// Мини-апп «Mamma mia, che club!» — навигация по материалам
 
-// Мини‑апп «Mamma mia, che club!» — навигация по материалам
-const $sp = document.getElementById('sectionPage');
-// Если страница ещё не отрисована, дождёмся DOM:
-if (!$sp || !$spTitle || !$spBack || !$spClose || !$spSearch || !$spList) {
-  window.addEventListener('DOMContentLoaded', () => {
-    // Пере-свяжем элементы
-    window.location.reload(); // самый простой и надёжный вариант подтянуть DOM + JS
-  });
-}
-const $spTitle = document.getElementById('spTitle');
-const $spBack = document.getElementById('spBack');
-const $spClose = document.getElementById('spClose');
-const $spSearch = document.getElementById('spSearch');
-const $spList = document.getElementById('spList');
+let $sp, $spTitle, $spBack, $spClose, $spSearch, $spList;
+let $tags, $sections, $search;
 
 let currentSection = null;
 let innerQuery = "";
 
 const tg = window.Telegram?.WebApp;
-const state = {
-  query: "",
-  tag: "Все",
-  tags: [],
-  sections: [],
-};
+const state = { query: "", tag: "Все", tags: [], sections: [] };
 
-// Инициализация
-fetch('./data.json')
-  .then(r => r.json())
-  .then(data => {
-    state.tags = data.tags;
-    state.sections = data.sections;
-    renderTags();
-    renderSections();
+// ==========================
+// 🔹 Инициализация после DOM
+// ==========================
+document.addEventListener("DOMContentLoaded", () => {
+  // Находим элементы
+  $sp       = document.getElementById("sectionPage");
+  $spTitle  = document.getElementById("spTitle");
+  $spBack   = document.getElementById("spBack");
+  $spClose  = document.getElementById("spClose");
+  $spSearch = document.getElementById("spSearch");
+  $spList   = document.getElementById("spList");
+
+  $tags     = document.getElementById("tags");
+  $sections = document.getElementById("sections");
+  $search   = document.getElementById("searchInput");
+
+  // --- Слушатели экрана раздела ---
+  if ($spBack)  $spBack.addEventListener("click", closeSectionPage);
+  if ($spClose) $spClose.addEventListener("click", closeSectionPage);
+  if ($spSearch) $spSearch.addEventListener("input", e => {
+    innerQuery = e.target.value;
+    renderSectionItems();
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Escape" && $sp && !$sp.hidden) closeSectionPage();
   });
 
-const $tags = document.getElementById('tags');
-const $sections = document.getElementById('sections');
-const $search = document.getElementById('searchInput');
+  // --- Поиск по всему приложению ---
+  if ($search) {
+    $search.addEventListener("input", (e) => {
+      state.query = e.target.value.trim().toLowerCase();
+      renderSections();
+    });
+  }
 
-$search.addEventListener('input', (e) => {
-  state.query = e.target.value.trim().toLowerCase();
-  renderSections();
+  // --- Нижняя навигация ---
+  document.querySelectorAll("nav.bottom button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("nav.bottom button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+      if (tab === "about") toast("Здесь будет «О клубе»");
+      if (tab === "chats") toast("Здесь будут ссылки на чаты");
+      if (tab === "fav")   toast("Здесь будут избранные материалы");
+      if (tab === "amb")   toast("Здесь будет программа амбассадоров");
+    });
+  });
+
+  // --- Telegram UI настройки ---
+  if (tg) {
+    try {
+      tg.expand();
+      document.body.setAttribute("data-theme", "light");
+      const tp = tg.themeParams || {};
+      const root = document.documentElement;
+      const map = { "--brand": tp.button_color, "--brandText": tp.button_text_color };
+      Object.entries(map).forEach(([k,v]) => v && root.style.setProperty(k, v));
+    } catch(e) {}
+  }
+
+  // --- Загружаем данные ---
+  fetch("./data.json")
+    .then(r => r.json())
+    .then(data => {
+      state.tags = data.tags || [];
+      state.sections = data.sections || [];
+      renderTags();
+      renderSections();
+    })
+    .catch(() => toast("Не удалось загрузить данные"));
 });
 
+// ==========================
+// 🔹 Отрисовка тегов и фильтрация
+// ==========================
 function renderTags() {
+  if (!$tags) return;
   $tags.innerHTML = "";
   const all = ["Все", ...state.tags];
   all.forEach(t => {
-    const btn = document.createElement('button');
-    btn.className = 'tag' + (t === state.tag ? ' active' : '');
+    const btn = document.createElement("button");
+    btn.className = "tag" + (t === state.tag ? " active" : "");
     btn.textContent = t;
-    btn.onclick = () => { state.tag = t; renderTags(); renderSections(); };
+    btn.onclick = () => {
+      state.tag = t;
+      renderTags();
+      renderSections();
+    };
     $tags.appendChild(btn);
   });
 }
 
 function matchFilters(item) {
   const byTag = (state.tag === "Все") || (item.tags || []).includes(state.tag);
-  const byQuery = !state.query || (item.title.toLowerCase().includes(state.query));
+  const byQuery = !state.query || item.title.toLowerCase().includes(state.query);
   return byTag && byQuery;
 }
+
+// ==========================
+// 🔹 Главная сетка разделов
+// ==========================
+function renderSections() {
+  if (!$sections) return;
+  $sections.innerHTML = "";
+  state.sections.forEach(sec => {
+    const count = (sec.items || []).filter(matchFilters).length;
+    const el = document.createElement("div");
+    el.className = "card";
+    el.onclick = () => openSectionPage(sec);
+    el.innerHTML = `
+      <div class="title">${sec.title}</div>
+      <div class="cover">${sec.cover || ""}</div>
+      <div class="badge" aria-label="количество">${count}</div>
+    `;
+    $sections.appendChild(el);
+  });
+}
+
+// ==========================
+// 🔹 Экран раздела
+// ==========================
 function openSectionPage(section) {
   currentSection = section;
   innerQuery = "";
@@ -68,7 +137,6 @@ function openSectionPage(section) {
   $spSearch.value = "";
   renderSectionItems();
   $sp.hidden = false;
-  // Чтобы WebApp подвинулся под fullscreen
   try { tg?.expand?.(); } catch(e) {}
 }
 
@@ -82,7 +150,7 @@ function renderSectionItems() {
   const q = innerQuery.trim().toLowerCase();
 
   const items = (currentSection.items || []).filter(it => {
-    const byGlobal = matchFilters(it);               // действуют теги и глобальный поиск
+    const byGlobal = matchFilters(it);
     const byInner = !q || it.title.toLowerCase().includes(q);
     return byGlobal && byInner;
   });
@@ -94,10 +162,10 @@ function renderSectionItems() {
 
   $spList.innerHTML = "";
   items.forEach(it => {
-    const row = document.createElement('button');
-    row.className = 'section-page__item';
+    const row = document.createElement("button");
+    row.className = "section-page__item";
     row.innerHTML = `
-      <span class="emj">📖</span>
+      <span class="emj">${detectEmoji(it.title) || "📖"}</span>
       <span>${it.title}</span>
     `;
     row.onclick = () => it.url && openLink(it.url);
@@ -105,136 +173,28 @@ function renderSectionItems() {
   });
 }
 
-function renderSections() {
-  $sections.innerHTML = "";
-  state.sections.forEach(sec => {
-    const count = (sec.items || []).filter(matchFilters).length;
-
-    const el = document.createElement('div');
-    el.className = 'card';
-    el.onclick = () => openSectionPage(sec);
-    el.innerHTML = `
-  <div class="title">${sec.title}</div>
-  <div class="cover">${sec.cover || ""}</div>
-  <div class="badge" aria-label="количество">${count}</div>
-`;
-    $sections.appendChild(el);
-  });
+// Автоопределение эмодзи в начале названия (если есть)
+function detectEmoji(title = "") {
+  const match = title.trim().match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
+  return match ? match[0] : null;
 }
 
-function openSectionV3(section) {
-  const tg = window.Telegram?.WebApp;
-
-  const allItems = (section.items || []).filter(matchFilters);
-
-  // Нет материалов — короткий алерт и выходим
-  if (!allItems.length) {
-    if (tg?.showAlert) tg.showAlert('Материалы не найдены под текущий фильтр/поиск.');
-    else toast('Материалы не найдены');
-    return;
-  }
-
-  // Обрезаем очень длинные подписи
-  const trim = (s, n = 28) => {
-    if (!s) return '';
-    s = String(s).replace(/\s+/g, ' ').trim();
-    return s.length > n ? s.slice(0, n - 1) + '…' : s;
-  };
-
-  const PAGE = 2; // по 2 материала на экран
-  const msg = 'Выберите материал ниже:';
-
-  const showPage = (start = 0) => {
-    const slice = allItems.slice(start, start + PAGE);
-
-    const buttons = slice.map((it, i) => ({
-      id: String(start + i),          // глобальный индекс
-      type: 'default',
-      text: trim(it.title, 28)
-    }));
-
-    const hasMore = start + PAGE < allItems.length;
-    if (hasMore) {
-      // единственная служебная кнопка
-      buttons.push({ id: 'more:' + (start + PAGE), type: 'default', text: 'Ещё…' });
-    }
-    // НИКАКОЙ "Отмена" тут больше нет — закрывается жестом
-
-    tg.showPopup(
-      { title: section.title, message: msg, buttons },
-      (btnId) => {
-        if (btnId == null) return; // закрыли жестом
-
-        if (btnId.startsWith?.('more:')) {
-          const nextStart = Number(btnId.split(':')[1]);
-          showPage(nextStart);
-          return;
-        }
-
-        const idx = Number(btnId);
-        const chosen = allItems[idx];
-        if (chosen?.url) openLink(chosen.url);
-      }
-    );
-  };
-
-  showPage(0);
-}
-
+// ==========================
+// 🔹 Вспомогательные функции
+// ==========================
 function openLink(url) {
-  // Открываем корректно внутри Telegram
   if (tg?.openTelegramLink && /^https?:\/\//.test(url)) {
     tg.openTelegramLink(url);
   } else {
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   }
-  toast('Открываю…');
+  toast("Открываю…");
 }
 
 function toast(msg) {
-  const el = document.getElementById('toast');
+  const el = document.getElementById("toast");
+  if (!el) return alert(msg);
   el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 1600);
+  el.classList.add("show");
+  setTimeout(() => el.classList.remove("show"), 1600);
 }
-// Telegram UI
-if (tg) {
-  try {
-    tg.expand();
-    // Принудительно светлая тема, как просили
-    document.body.setAttribute('data-theme', 'light');
-    // Но цвета кнопок/ссылок берём из темы Telegram, если есть
-    const tp = tg.themeParams || {};
-    const root = document.documentElement;
-    const map = { '--brand': tp.button_color, '--brandText': tp.button_text_color };
-    Object.entries(map).forEach(([k,v]) => v && root.style.setProperty(k, v));
-  } catch(e) {}
-}
-$spBack.addEventListener('click', closeSectionPage);
-$spClose.addEventListener('click', closeSectionPage);
-$spSearch.addEventListener('input', e => {
-  innerQuery = e.target.value;
-  renderSectionItems();
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && !$sp.hidden) closeSectionPage();
-});
-
-// нижняя навигация — просто активное состояние
-document.querySelectorAll('nav.bottom button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('nav.bottom button').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const tab = btn.dataset.tab;
-    if ($spBack)  $spBack.addEventListener('click', closeSectionPage);
-if ($spClose) $spClose.addEventListener('click', closeSectionPage);
-if ($spSearch) $spSearch.addEventListener('input', e => {
-  innerQuery = e.target.value;
-  renderSectionItems();
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && $sp && !$sp.hidden) closeSectionPage();
-});
-
-  });
-});
