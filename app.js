@@ -1,4 +1,4 @@
-// Мини-апп «Mamma mia, che club!» — навигация по материалам
+// Mini App: Mamma mia, che club! — навигатор материалов
 
 let $sp, $spTitle, $spBack, $spClose, $spSearch, $spList;
 let $tags, $sections, $search;
@@ -9,11 +9,11 @@ let innerQuery = "";
 const tg = window.Telegram?.WebApp;
 const state = { query: "", tag: "Все", tags: [], sections: [] };
 
-// ==========================
-// 🔹 Инициализация после DOM
-// ==========================
+/* ==============================
+   ИНИЦИАЛИЗАЦИЯ ПОСЛЕ DOM
+================================ */
 document.addEventListener("DOMContentLoaded", () => {
-  // Находим элементы
+  // Привязка DOM-элементов
   $sp       = document.getElementById("sectionPage");
   $spTitle  = document.getElementById("spTitle");
   $spBack   = document.getElementById("spBack");
@@ -25,18 +25,18 @@ document.addEventListener("DOMContentLoaded", () => {
   $sections = document.getElementById("sections");
   $search   = document.getElementById("searchInput");
 
-  // --- Слушатели экрана раздела ---
+  // Экран раздела: слушатели
   if ($spBack)  $spBack.addEventListener("click", closeSectionPage);
   if ($spClose) $spClose.addEventListener("click", closeSectionPage);
-  if ($spSearch) $spSearch.addEventListener("input", e => {
+  if ($spSearch) $spSearch.addEventListener("input", (e) => {
     innerQuery = e.target.value;
     renderSectionItems();
   });
-  document.addEventListener("keydown", e => {
+  document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && $sp && !$sp.hidden) closeSectionPage();
   });
 
-  // --- Поиск по всему приложению ---
+  // Глобальный поиск
   if ($search) {
     $search.addEventListener("input", (e) => {
       state.query = e.target.value.trim().toLowerCase();
@@ -44,10 +44,10 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- Нижняя навигация ---
-  document.querySelectorAll("nav.bottom button").forEach(btn => {
+  // Нижняя панель (если используются кнопки)
+  document.querySelectorAll("nav.bottom button").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll("nav.bottom button").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll("nav.bottom button").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       const tab = btn.dataset.tab;
       if (tab === "about") toast("Здесь будет «О клубе»");
@@ -57,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // --- Telegram UI настройки ---
+  // Telegram UI
   if (tg) {
     try {
       tg.expand();
@@ -65,14 +65,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const tp = tg.themeParams || {};
       const root = document.documentElement;
       const map = { "--brand": tp.button_color, "--brandText": tp.button_text_color };
-      Object.entries(map).forEach(([k,v]) => v && root.style.setProperty(k, v));
-    } catch(e) {}
+      Object.entries(map).forEach(([k, v]) => v && root.style.setProperty(k, v));
+    } catch (_) {}
   }
 
-  // --- Загружаем данные ---
+  // Загрузка данных
   fetch("./data.json")
-    .then(r => r.json())
-    .then(data => {
+    .then((r) => r.json())
+    .then((data) => {
       state.tags = data.tags || [];
       state.sections = data.sections || [];
       renderTags();
@@ -81,14 +81,14 @@ document.addEventListener("DOMContentLoaded", () => {
     .catch(() => toast("Не удалось загрузить данные"));
 });
 
-// ==========================
-// 🔹 Отрисовка тегов и фильтрация
-// ==========================
+/* ==============================
+   ТЕГИ + ФИЛЬТРЫ
+================================ */
 function renderTags() {
   if (!$tags) return;
   $tags.innerHTML = "";
   const all = ["Все", ...state.tags];
-  all.forEach(t => {
+  all.forEach((t) => {
     const btn = document.createElement("button");
     btn.className = "tag" + (t === state.tag ? " active" : "");
     btn.textContent = t;
@@ -102,19 +102,20 @@ function renderTags() {
 }
 
 function matchFilters(item) {
-  const byTag = (state.tag === "Все") || (item.tags || []).includes(state.tag);
+  const byTag = state.tag === "Все" || (item.tags || []).includes(state.tag);
   const byQuery = !state.query || item.title.toLowerCase().includes(state.query);
   return byTag && byQuery;
 }
 
-// ==========================
-// 🔹 Главная сетка разделов
-// ==========================
+/* ==============================
+   ГЛАВНАЯ СЕТКА РАЗДЕЛОВ
+================================ */
 function renderSections() {
   if (!$sections) return;
   $sections.innerHTML = "";
-  state.sections.forEach(sec => {
+  state.sections.forEach((sec) => {
     const count = (sec.items || []).filter(matchFilters).length;
+
     const el = document.createElement("div");
     el.className = "card";
     el.onclick = () => openSectionPage(sec);
@@ -127,31 +128,31 @@ function renderSections() {
   });
 }
 
-// ==========================
-// 🔹 Экран раздела
-// ==========================
+/* ==============================
+   ЭКРАН РАЗДЕЛА (FULLSCREEN)
+================================ */
 function openSectionPage(section) {
   currentSection = section;
   innerQuery = "";
-  $spTitle.textContent = section.title;
-  $spSearch.value = "";
+  if ($spTitle)  $spTitle.textContent = section.title;
+  if ($spSearch) $spSearch.value = "";
   renderSectionItems();
-  $sp.hidden = false;
-  try { tg?.expand?.(); } catch(e) {}
+  if ($sp) $sp.hidden = false;
+  try { tg?.expand?.(); } catch (_) {}
 }
 
 function closeSectionPage() {
-  $sp.hidden = true;
+  if ($sp) $sp.hidden = true;
   currentSection = null;
 }
 
 function renderSectionItems() {
-  if (!currentSection) return;
-  const q = innerQuery.trim().toLowerCase();
+  if (!currentSection || !$spList) return;
 
-  const items = (currentSection.items || []).filter(it => {
+  const q = innerQuery.trim().toLowerCase();
+  const items = (currentSection.items || []).filter((it) => {
     const byGlobal = matchFilters(it);
-    const byInner = !q || it.title.toLowerCase().includes(q);
+    const byInner  = !q || it.title.toLowerCase().includes(q);
     return byGlobal && byInner;
   });
 
@@ -161,27 +162,34 @@ function renderSectionItems() {
   }
 
   $spList.innerHTML = "";
-  items.forEach(it => {
+  items.forEach((it) => {
+    const { emoji, text } = splitLeadingEmoji(it.title);
     const row = document.createElement("button");
     row.className = "section-page__item";
     row.innerHTML = `
-      <span class="emj">${detectEmoji(it.title) || "📖"}</span>
-      <span>${it.title}</span>
+      <span class="emj">${emoji || "📖"}</span>
+      <span class="t">${text || it.title}</span>
     `;
     row.onclick = () => it.url && openLink(it.url);
     $spList.appendChild(row);
   });
 }
 
-// Автоопределение эмодзи в начале названия (если есть)
-function detectEmoji(title = "") {
-  const match = title.trim().match(/^[\p{Emoji}\p{Extended_Pictographic}]/u);
-  return match ? match[0] : null;
+/* Выделяем первую эмодзи в начале строки и убираем её из текста */
+function splitLeadingEmoji(title = "") {
+  const t = String(title).trim();
+  // группа из одного или нескольких пиктографических символов в начале
+  const m = t.match(/^[\p{Extended_Pictographic}\p{Emoji}\uFE0F\u200D]+/u);
+  if (!m) return { emoji: null, text: t };
+  const seq = m[0];
+  const emoji = Array.from(seq)[0];       // берём первый символ
+  const text = t.slice(seq.length).trim();
+  return { emoji, text };
 }
 
-// ==========================
-// 🔹 Вспомогательные функции
-// ==========================
+/* ==============================
+   УТИЛИТЫ
+================================ */
 function openLink(url) {
   if (tg?.openTelegramLink && /^https?:\/\//.test(url)) {
     tg.openTelegramLink(url);
