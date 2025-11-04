@@ -167,3 +167,72 @@ h1 { margin:0; font-size:22px; }
   color: var(--hint);
   opacity: 0.9;
 }
+/* ===== FULLSCREEN СТРАНИЦА РАЗДЕЛА ===== */
+.section-page[hidden] { display: none !important; }
+
+.section-page {
+  position: fixed;
+  inset: 0;
+  background: #fff;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-page__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  background: #fff;
+}
+
+.section-page__head h2 {
+  margin: 0;
+  font-size: 18px;
+  flex: 1;
+}
+
+.sp-btn {
+  background: transparent;
+  border: 0;
+  font-size: 18px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.section-page__search {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-page__search input {
+  width: 100%;
+  height: 46px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 16px;
+}
+
+.section-page__list {
+  flex: 1;
+  overflow: auto;
+  padding: 6px;
+}
+
+.section-page__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  margin: 6px 4px;
+  font-size: 15px;
+}
+
+.section-page__item:hover { background: #f7f8ff; }
+.section-page__item .emj { font-size: 18px; }
