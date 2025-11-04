@@ -1,5 +1,15 @@
 
 // Мини‑апп «Mamma mia, che club!» — навигация по материалам
+const $sp = document.getElementById('sectionPage');
+const $spTitle = document.getElementById('spTitle');
+const $spBack = document.getElementById('spBack');
+const $spClose = document.getElementById('spClose');
+const $spSearch = document.getElementById('spSearch');
+const $spList = document.getElementById('spList');
+
+let currentSection = null;
+let innerQuery = "";
+
 const tg = window.Telegram?.WebApp;
 const state = {
   query: "",
@@ -44,6 +54,49 @@ function matchFilters(item) {
   const byQuery = !state.query || (item.title.toLowerCase().includes(state.query));
   return byTag && byQuery;
 }
+function openSectionPage(section) {
+  currentSection = section;
+  innerQuery = "";
+  $spTitle.textContent = section.title;
+  $spSearch.value = "";
+  renderSectionItems();
+  $sp.hidden = false;
+  // Чтобы WebApp подвинулся под fullscreen
+  try { tg?.expand?.(); } catch(e) {}
+}
+
+function closeSectionPage() {
+  $sp.hidden = true;
+  currentSection = null;
+}
+
+function renderSectionItems() {
+  if (!currentSection) return;
+  const q = innerQuery.trim().toLowerCase();
+
+  const items = (currentSection.items || []).filter(it => {
+    const byGlobal = matchFilters(it);               // действуют теги и глобальный поиск
+    const byInner = !q || it.title.toLowerCase().includes(q);
+    return byGlobal && byInner;
+  });
+
+  if (!items.length) {
+    $spList.innerHTML = `<div style="padding:14px;color:var(--hint)">Ничего не найдено.</div>`;
+    return;
+  }
+
+  $spList.innerHTML = "";
+  items.forEach(it => {
+    const row = document.createElement('button');
+    row.className = 'section-page__item';
+    row.innerHTML = `
+      <span class="emj">📖</span>
+      <span>${it.title}</span>
+    `;
+    row.onclick = () => it.url && openLink(it.url);
+    $spList.appendChild(row);
+  });
+}
 
 function renderSections() {
   $sections.innerHTML = "";
@@ -52,7 +105,7 @@ function renderSections() {
 
     const el = document.createElement('div');
     el.className = 'card';
-    el.onclick = () => openSectionV3(sec);
+    el.onclick = () => openSectionPage(sec);
     el.innerHTML = `
   <div class="title">${sec.title}</div>
   <div class="cover">${sec.cover || ""}</div>
@@ -150,6 +203,15 @@ if (tg) {
     Object.entries(map).forEach(([k,v]) => v && root.style.setProperty(k, v));
   } catch(e) {}
 }
+$spBack.addEventListener('click', closeSectionPage);
+$spClose.addEventListener('click', closeSectionPage);
+$spSearch.addEventListener('input', e => {
+  innerQuery = e.target.value;
+  renderSectionItems();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$sp.hidden) closeSectionPage();
+});
 
 // нижняя навигация — просто активное состояние
 document.querySelectorAll('nav.bottom button').forEach(btn => {
